@@ -40,6 +40,8 @@ export interface FriendOfferInput {
   viaLink: boolean;
   /** Angemeldete Person (null = nicht angemeldet) */
   viewerId: string | null;
+  /** Gäste bekommen kein Pop-up (sie sollen sich zuerst registrieren) */
+  viewerIsGuest?: boolean;
   creatorId: string;
   /** Meine Freundschaften (angenommen oder offen) */
   friends: readonly { userId: string; status: 'pending' | 'accepted'; direction: 'incoming' | 'outgoing' }[];
@@ -47,12 +49,12 @@ export interface FriendOfferInput {
 
 /**
  * Pop-up «Freundschaftsanfrage senden?» beim Öffnen eines Links:
- * nur wenn angemeldet, nicht die eigene Aktivität, noch nicht befreundet
+ * nur wenn angemeldet (nicht als Gast), nicht die eigene Aktivität, noch nicht befreundet
  * und noch keine eigene Anfrage offen. (Hat der Ersteller mich schon angefragt,
  * wird die Anfrage damit angenommen.)
  */
 export function shouldOfferFriendship(i: FriendOfferInput): boolean {
-  if (!i.viaLink || !i.viewerId || i.viewerId === i.creatorId) return false;
+  if (!i.viaLink || !i.viewerId || i.viewerIsGuest || i.viewerId === i.creatorId) return false;
   const existing = i.friends.find((f) => f.userId === i.creatorId);
   if (!existing) return true;
   return existing.status === 'pending' && existing.direction === 'incoming';

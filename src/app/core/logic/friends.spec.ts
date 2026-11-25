@@ -13,6 +13,10 @@ describe('Pop-up Freundschaftsanfrage bei Linkaufruf', () => {
     expect(shouldOfferFriendship(base)).toBe(true);
   });
 
+  it('erscheint nicht für Gäste', () => {
+    expect(shouldOfferFriendship({ ...base, viewerIsGuest: true })).toBe(false);
+  });
+
   it('erscheint nicht ohne Link, ohne Anmeldung oder bei eigener Aktivität', () => {
     expect(shouldOfferFriendship({ ...base, viaLink: false })).toBe(false);
     expect(shouldOfferFriendship({ ...base, viewerId: null })).toBe(false);

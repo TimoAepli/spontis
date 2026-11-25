@@ -188,8 +188,16 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
     const askedKey = `spontis-friend-offer-${a.creatorId}`;
     if (sessionStorage.getItem(askedKey)) return;
 
+    if (this.auth.isGuest()) return;
     const friends = this.myId() ? await this.data.listFriends().catch(() => []) : [];
-    if (!shouldOfferFriendship({ viaLink: true, viewerId: this.myId(), creatorId: a.creatorId, friends })) return;
+    const offer = shouldOfferFriendship({
+      viaLink: true,
+      viewerId: this.myId(),
+      viewerIsGuest: this.auth.isGuest(),
+      creatorId: a.creatorId,
+      friends,
+    });
+    if (!offer) return;
     sessionStorage.setItem(askedKey, '1');
 
     const name = a.creatorFirstName;
