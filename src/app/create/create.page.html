@@ -1,0 +1,172 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/entdecken" text="Abbrechen" icon="" />
+    </ion-buttons>
+    <ion-title>Neue Aktivität</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form (ngSubmit)="submit()" novalidate>
+    <!-- Kategorie -->
+    <section class="block" [class.has-error]="shownErrors().category">
+      <h2>Was?</h2>
+      <div class="categories">
+        @for (c of categories; track c[0]) {
+          <button
+            type="button"
+            class="cat"
+            [class.active]="category() === c[0]"
+            [attr.aria-pressed]="category() === c[0]"
+            (click)="selectCategory(c[0])"
+          >
+            <span class="emoji" aria-hidden="true">{{ c[1].emoji }}</span>
+            <span>{{ c[1].label }}</span>
+          </button>
+        }
+      </div>
+      @if (shownErrors().category; as err) {
+        <p class="error">{{ err }}</p>
+      }
+    </section>
+
+    <!-- Titel -->
+    <section class="block" [class.has-error]="shownErrors().title">
+      <label>
+        <h2>Titel</h2>
+        <ion-input
+          class="sp-input"
+          name="title"
+          placeholder="z. B. Volleyball, Pizza, Feierabendbier"
+          [maxlength]="60"
+          [counter]="false"
+          [ngModel]="title()"
+          (ngModelChange)="title.set($event ?? '')"
+        />
+      </label>
+      @if (shownErrors().title; as err) {
+        <p class="error">{{ err }}</p>
+      }
+    </section>
+
+    <!-- Zeit -->
+    <section class="block" [class.has-error]="shownErrors().time">
+      <h2>Wann? <span class="sub">heute</span></h2>
+      <div class="time-row">
+        <input
+          class="time-input"
+          type="time"
+          name="time"
+          aria-label="Startzeit"
+          [ngModel]="time()"
+          (ngModelChange)="time.set($event ?? '')"
+        />
+        <div class="chips">
+          @for (q of quickTimes(); track q.label) {
+            <button type="button" class="chip" [class.active]="time() === q.value" (click)="time.set(q.value)">
+              {{ q.label }}
+            </button>
+          }
+        </div>
+      </div>
+      @if (shownErrors().time; as err) {
+        <p class="error">{{ err }}</p>
+      }
+    </section>
+
+    <!-- Treffpunkt -->
+    <section class="block" [class.has-error]="shownErrors().place">
+      <h2>Wo?</h2>
+      <app-location-picker (picked)="onPicked($event)" />
+      @if (lat() !== null) {
+        <label class="place-name">
+          <span class="label">Name des Treffpunkts</span>
+          <ion-input
+            class="sp-input"
+            name="placeName"
+            placeholder="z. B. Eingang Drei Weieren"
+            [maxlength]="120"
+            [ngModel]="placeName()"
+            (ngModelChange)="placeName.set($event ?? '')"
+          />
+        </label>
+      }
+      @if (shownErrors().place; as err) {
+        <p class="error">{{ err }}</p>
+      }
+    </section>
+
+    <!-- Mindestanzahl -->
+    <section class="block">
+      <h2>Ab wie vielen Personen?</h2>
+      <div class="stepper">
+        <button
+          type="button"
+          aria-label="Eine Person weniger"
+          [disabled]="minParticipants() <= minAllowed"
+          (click)="changeParticipants(-1)"
+        >
+          −
+        </button>
+        <div class="value" aria-live="polite">
+          <strong>{{ minParticipants() }}</strong>
+          <span>Personen inkl. dir</span>
+        </div>
+        <button
+          type="button"
+          aria-label="Eine Person mehr"
+          [disabled]="minParticipants() >= maxAllowed"
+          (click)="changeParticipants(1)"
+        >
+          +
+        </button>
+      </div>
+      <p class="help">Ab dieser Anzahl zeigt spontis «Findet statt».</p>
+    </section>
+
+    <!-- Sichtbarkeit -->
+    <section class="block">
+      <h2>Wer sieht es?</h2>
+      <div class="visibility">
+        <button
+          type="button"
+          class="vis"
+          [class.active]="visibility() === 'friends'"
+          [attr.aria-pressed]="visibility() === 'friends'"
+          (click)="selectVisibility('friends')"
+        >
+          <strong>👥 Nur Freunde</strong>
+          <span>Nur deine Freunde sehen und beitreten</span>
+        </button>
+        <button
+          type="button"
+          class="vis"
+          [class.active]="visibility() === 'nearby'"
+          [attr.aria-pressed]="visibility() === 'nearby'"
+          (click)="selectVisibility('nearby')"
+        >
+          <strong>📍 Alle in der Nähe</strong>
+          <span>Alle im Umkreis von 15 km</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- unsichtbarer Submit, damit «Enter» auf der Tastatur funktioniert -->
+    <button type="submit" hidden></button>
+  </form>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <div class="footer">
+      <ion-button expand="block" size="large" [disabled]="busy()" (click)="submit()">
+        @if (busy()) {
+          <ion-spinner name="crescent" />
+        } @else {
+          Aktivität erstellen
+        }
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>
