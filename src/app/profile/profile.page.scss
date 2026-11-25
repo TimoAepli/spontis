@@ -1,0 +1,164 @@
+.me {
+  text-align: center;
+  margin: 8px 0 24px;
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .username {
+    margin: 4px 0 0;
+    color: var(--sp-muted);
+  }
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: var(--ion-color-primary);
+  color: #fff;
+  font-size: 36px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+
+  &.small {
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    font-size: 16px;
+  }
+
+  &.muted-avatar {
+    background: var(--sp-muted);
+  }
+}
+
+.card {
+  background: var(--sp-surface);
+  border-radius: var(--sp-radius);
+  padding: 16px;
+  margin-bottom: 14px;
+  border: 2px solid transparent;
+
+  &.highlight {
+    border-color: var(--ion-color-warning);
+    background: rgba(255, 200, 50, 0.15);
+  }
+
+  h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  h4 {
+    margin: 16px 0 4px;
+    font-size: 14px;
+    color: var(--sp-muted);
+    font-weight: 600;
+  }
+}
+
+.count {
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--ion-color-primary);
+  color: #fff;
+}
+
+.muted {
+  color: var(--sp-muted);
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.code-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.code {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--ion-color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  ion-input {
+    flex: 1;
+    --background: #fff;
+    text-transform: uppercase;
+  }
+
+  ion-button {
+    margin: 0;
+    min-height: 52px;
+  }
+}
+
+.message {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: var(--ion-color-danger);
+
+  &.ok {
+    color: var(--ion-color-primary);
+    font-weight: 600;
+  }
+}
+
+.people {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+  }
+
+  .who {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+
+    small {
+      color: var(--sp-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.card.demo {
+  border-color: var(--ion-color-warning);
+}
+
+.signout {
+  margin-top: 16px;
+}

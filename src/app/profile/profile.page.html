@@ -1,0 +1,130 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Profil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content pullingText="Zum Aktualisieren ziehen" refreshingSpinner="crescent" />
+  </ion-refresher>
+
+  @if (auth.profile(); as p) {
+    <section class="me">
+      <div class="avatar" aria-hidden="true">{{ p.first_name.charAt(0).toUpperCase() }}</div>
+      <h2>{{ p.first_name }}</h2>
+      <p class="username">&#64;{{ p.username }}</p>
+    </section>
+
+    <!-- Offene Anfragen an mich: zuoberst, damit man sie sieht -->
+    @if (incoming().length > 0) {
+      <section class="card highlight">
+        <h3>Freundschaftsanfragen</h3>
+        <ul class="people">
+          @for (f of incoming(); track f.userId) {
+            <li>
+              <span class="avatar small" aria-hidden="true">{{ f.firstName.charAt(0).toUpperCase() }}</span>
+              <span class="who">
+                <strong>{{ f.firstName }}</strong>
+                <small>&#64;{{ f.username }}</small>
+              </span>
+              <ion-button size="small" (click)="accept(f)">Annehmen</ion-button>
+              <ion-button size="small" fill="clear" color="medium" (click)="decline(f)">Ablehnen</ion-button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <!-- Einladen -->
+    <section class="card">
+      <h3>Freunde einladen</h3>
+      <p class="muted">Schick deinen Link in den Gruppenchat oder sag deinen Code.</p>
+      <div class="code-row">
+        <span class="code" aria-label="Dein Einladungscode">{{ p.invite_code }}</span>
+        <ion-button fill="outline" size="small" (click)="copyCode()">Kopieren</ion-button>
+      </div>
+      <ion-button expand="block" (click)="shareInvite()">Einladungslink teilen</ion-button>
+    </section>
+
+    <!-- Code eingeben -->
+    <section class="card">
+      <h3>Code eingeben</h3>
+      <form class="add-row" (ngSubmit)="addByCode()">
+        <ion-input
+          class="sp-input"
+          name="code"
+          placeholder="z. B. 4F9A2C"
+          autocapitalize="characters"
+          [spellcheck]="false"
+          [maxlength]="80"
+          [ngModel]="code()"
+          (ngModelChange)="code.set($event ?? '')"
+        />
+        <ion-button type="submit" [disabled]="busy() || !code().trim()">
+          @if (busy()) {
+            <ion-spinner name="crescent" />
+          } @else {
+            Hinzufügen
+          }
+        </ion-button>
+      </form>
+      @if (message(); as m) {
+        <p class="message" [class.ok]="m.ok" role="status">{{ m.text }}</p>
+      }
+    </section>
+
+    <!-- Freunde -->
+    <section class="card">
+      <h3>Freunde @if (friends().length > 0) {<span class="count">{{ friends().length }}</span>}</h3>
+      @if (loading()) {
+        <ion-spinner name="crescent" />
+      } @else if (friends().length === 0) {
+        <p class="muted">Noch keine Freunde. Lade jemanden ein – dann seht ihr gegenseitig eure «Nur Freunde»-Aktivitäten.</p>
+      } @else {
+        <ul class="people">
+          @for (f of friends(); track f.userId) {
+            <li>
+              <span class="avatar small" aria-hidden="true">{{ f.firstName.charAt(0).toUpperCase() }}</span>
+              <span class="who">
+                <strong>{{ f.firstName }}</strong>
+                <small>&#64;{{ f.username }}</small>
+              </span>
+              <ion-button size="small" fill="clear" color="medium" (click)="confirmRemove(f)">Entfernen</ion-button>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (outgoing().length > 0) {
+        <h4>Gesendet, wartet auf Antwort</h4>
+        <ul class="people">
+          @for (f of outgoing(); track f.userId) {
+            <li>
+              <span class="avatar small muted-avatar" aria-hidden="true">{{ f.firstName.charAt(0).toUpperCase() }}</span>
+              <span class="who">
+                <strong>{{ f.firstName }}</strong>
+                <small>&#64;{{ f.username }}</small>
+              </span>
+              <ion-button size="small" fill="clear" color="medium" (click)="decline(f)">Zurückziehen</ion-button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    @if (auth.isDemo) {
+      <section class="card demo">
+        <h3>Demo-Modus</h3>
+        <p class="muted">
+          Du siehst Beispieldaten. Nichts wird gespeichert, neu laden setzt alles zurück.
+        </p>
+        <ion-button expand="block" fill="outline" (click)="leaveDemo()">Demo beenden</ion-button>
+      </section>
+    } @else {
+      <ion-button class="signout" fill="clear" color="medium" expand="block" (click)="confirmSignOut()">
+        Abmelden
+      </ion-button>
+    }
+  }
+</ion-content>
