@@ -30,7 +30,7 @@
       </label>
 
       <label class="field">
-        <span class="label">Vorname</span>
+        <span class="label">Anzeigename</span>
         <ion-input
           class="sp-input"
           name="firstName"
@@ -59,7 +59,13 @@
         }
       </ion-button>
 
-      <p class="privacy">Kein Passwort, keine E-Mail. Dein Konto bleibt in diesem Browser gespeichert.</p>
+      <p class="privacy">
+        Kein Passwort, keine E-Mail nötig. Im Profil kannst du dein Konto später mit E-Mail und Passwort sichern.
+      </p>
+      <p class="privacy login-link">
+        Schon ein Konto?
+        <a [routerLink]="['/login']" [queryParams]="{ weiter: weiter() }">Anmelden</a>
+      </p>
     </form>
   </div>
 </ion-content>

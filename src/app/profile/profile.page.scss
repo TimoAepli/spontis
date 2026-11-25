@@ -159,6 +159,35 @@
   border-color: var(--ion-color-warning);
 }
 
+.secure-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  ion-input {
+    --background: #fff;
+  }
+
+  .message {
+    margin: 0;
+  }
+}
+
+.secured {
+  margin: 0 0 4px;
+  color: var(--ion-color-primary);
+}
+
+.other-account {
+  text-align: center;
+  font-size: 14px;
+  margin: 0 0 24px;
+
+  a {
+    color: var(--sp-muted);
+  }
+}
+
 .signout {
   margin-top: 16px;
 }

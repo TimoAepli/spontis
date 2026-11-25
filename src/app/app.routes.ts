@@ -8,6 +8,11 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/welcome.page').then((m) => m.WelcomePage),
   },
   {
+    // Anmelden mit E-Mail und Passwort (ohne Routen-Schutz: auch Gäste können sich anmelden)
+    path: 'login',
+    loadComponent: () => import('./auth/login.page').then((m) => m.LoginPage),
+  },
+  {
     path: 'tabs',
     canActivate: [requireProfile],
     loadComponent: () => import('./tabs/tabs.page').then((m) => m.TabsPage),

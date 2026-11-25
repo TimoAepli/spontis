@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   AlertController,
   IonButton,
@@ -23,6 +23,8 @@ import {
   isValidInviteCode,
   normalizeInviteCode,
 } from '../core/logic/friends';
+import { emailError, passwordError } from '../core/logic/account';
+import { usernameError } from '../core/logic/username';
 import { Friend } from '../core/models';
 import { appLink, ShareService } from '../core/share.service';
 
@@ -30,6 +32,7 @@ import { appLink, ShareService } from '../core/share.service';
   selector: 'app-profile',
   imports: [
     FormsModule,
+    RouterLink,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -55,6 +58,23 @@ export class ProfilePage implements ViewWillEnter {
   readonly code = signal('');
   readonly busy = signal(false);
   readonly message = signal<{ text: string; ok: boolean } | null>(null);
+
+  // Konto sichern
+  readonly secureEmail = signal('');
+  readonly securePassword = signal('');
+  readonly secureSubmitted = signal(false);
+  readonly secureBusy = signal(false);
+  readonly secureMessage = signal<{ text: string; ok: boolean } | null>(null);
+  readonly secureEmailError = computed(() => (this.secureSubmitted() ? emailError(this.secureEmail()) : null));
+  readonly securePasswordError = computed(() =>
+    this.secureSubmitted() ? passwordError(this.securePassword()) : null,
+  );
+
+  // Benutzername für Gäste
+  readonly newUsername = signal('');
+  readonly usernameSubmitted = signal(false);
+  readonly usernameMessage = signal<string | null>(null);
+  readonly newUsernameError = computed(() => (this.usernameSubmitted() ? usernameError(this.newUsername()) : null));
 
   readonly incoming = computed(() =>
     this.friendships().filter((f) => f.status === 'pending' && f.direction === 'incoming'),
@@ -156,12 +176,49 @@ export class ProfilePage implements ViewWillEnter {
     leaveDemoMode();
   }
 
+  // ---------- Konto sichern (E-Mail + Passwort) ----------
+
+  async secureAccount(): Promise<void> {
+    this.secureSubmitted.set(true);
+    this.secureMessage.set(null);
+    if (emailError(this.secureEmail()) || passwordError(this.securePassword())) return;
+
+    this.secureBusy.set(true);
+    const result = await this.auth.secureAccount(this.secureEmail(), this.securePassword());
+    this.secureBusy.set(false);
+
+    const messages: Record<typeof result, { text: string; ok: boolean }> = {
+      ok: { text: 'Konto gesichert. Du kannst dich jetzt auf jedem Gerät anmelden.', ok: true },
+      confirm_email: {
+        text: 'Wir haben dir eine E-Mail geschickt. Bestätige den Link darin und tippe dann nochmals auf «Konto sichern».',
+        ok: true,
+      },
+      email_taken: { text: 'Diese E-Mail gehört schon zu einem anderen Konto. Melde dich damit an.', ok: false },
+      error: { text: 'Das hat nicht geklappt. Prüfe die Internetverbindung.', ok: false },
+    };
+    this.secureMessage.set(messages[result]);
+    if (result === 'ok') this.securePassword.set('');
+  }
+
+  // ---------- Benutzername für Gäste ----------
+
+  async saveUsername(): Promise<void> {
+    this.usernameSubmitted.set(true);
+    this.usernameMessage.set(null);
+    if (usernameError(this.newUsername())) return;
+    const result = await this.auth.chooseUsername(this.newUsername());
+    if (result === 'username_taken') this.usernameMessage.set('Dieser Benutzername ist schon vergeben.');
+    else if (result === 'error') this.usernameMessage.set('Das hat nicht geklappt.');
+  }
+
   async confirmSignOut(): Promise<void> {
+    const email = this.auth.email();
     const alert = await this.alerts.create({
       header: 'Abmelden?',
-      message:
-        'Ohne E-Mail und Passwort kannst du dich danach nicht mehr in dieses Konto einloggen. ' +
-        'Deine Aktivitäten und Freunde bleiben dann ohne dich zurück.',
+      message: email
+        ? `Du kannst dich jederzeit mit ${email} und deinem Passwort wieder anmelden.`
+        : 'Dein Konto ist nicht mit E-Mail und Passwort gesichert. Nach dem Abmelden kommst du nicht mehr hinein. ' +
+          'Sichere es zuerst unter «Konto sichern».',
       buttons: [
         { text: 'Abbrechen', role: 'cancel' },
         {

@@ -1,6 +1,6 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { IonButton, IonContent, IonInput, IonSpinner } from '@ionic/angular/standalone';
 import { AuthService } from '../core/auth.service';
 import { firstNameError, normalizeUsername, usernameError } from '../core/logic/username';
@@ -8,7 +8,7 @@ import { firstNameError, normalizeUsername, usernameError } from '../core/logic/
 /** Registrierung: Benutzername + Vorname, mehr nicht. */
 @Component({
   selector: 'app-welcome',
-  imports: [FormsModule, IonContent, IonInput, IonButton, IonSpinner],
+  imports: [FormsModule, RouterLink, IonContent, IonInput, IonButton, IonSpinner],
   templateUrl: './welcome.page.html',
   styleUrl: './welcome.page.scss',
 })

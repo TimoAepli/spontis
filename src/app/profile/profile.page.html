@@ -113,6 +113,84 @@
       }
     </section>
 
+    @if (!auth.isDemo) {
+      <!-- Gäste: Benutzername wählen, damit Freunde sie finden -->
+      @if (auth.isGuest()) {
+        <section class="card">
+          <h3>Benutzername wählen</h3>
+          <p class="muted">Du bist als Gast dabei. Mit einem Benutzernamen wirst du zum normalen Konto.</p>
+          <form class="add-row" (ngSubmit)="saveUsername()">
+            <ion-input
+              class="sp-input"
+              name="newUsername"
+              placeholder="z. B. lea_sg"
+              autocapitalize="off"
+              [spellcheck]="false"
+              [maxlength]="24"
+              [ngModel]="newUsername()"
+              (ngModelChange)="newUsername.set($event ?? '')"
+            />
+            <ion-button type="submit">Speichern</ion-button>
+          </form>
+          @if (newUsernameError() ?? usernameMessage(); as err) {
+            <p class="message">{{ err }}</p>
+          }
+        </section>
+      }
+
+      <!-- Konto sichern: E-Mail + Passwort -->
+      <section class="card">
+        <h3>Konto sichern</h3>
+        @if (auth.email(); as email) {
+          <p class="secured">✓ Gesichert mit <strong>{{ email }}</strong></p>
+          <p class="muted">Du kannst dich auf jedem Gerät mit E-Mail und Passwort anmelden.</p>
+        } @else {
+          <p class="muted">
+            Hinterlege E-Mail und Passwort. Dann kannst du dich auf einem anderen Handy anmelden oder nach dem Löschen
+            des Browsers wieder hinein.
+          </p>
+          <form class="secure-form" (ngSubmit)="secureAccount()" novalidate>
+            <ion-input
+              class="sp-input"
+              name="secureEmail"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              autocapitalize="off"
+              placeholder="E-Mail"
+              [ngModel]="secureEmail()"
+              (ngModelChange)="secureEmail.set($event ?? '')"
+            />
+            @if (secureEmailError(); as err) {
+              <p class="message">{{ err }}</p>
+            }
+            <ion-input
+              class="sp-input"
+              name="securePassword"
+              type="password"
+              autocomplete="new-password"
+              placeholder="Passwort (mind. 8 Zeichen)"
+              [ngModel]="securePassword()"
+              (ngModelChange)="securePassword.set($event ?? '')"
+            />
+            @if (securePasswordError(); as err) {
+              <p class="message">{{ err }}</p>
+            }
+            <ion-button type="submit" expand="block" [disabled]="secureBusy()">
+              @if (secureBusy()) {
+                <ion-spinner name="crescent" />
+              } @else {
+                Konto sichern
+              }
+            </ion-button>
+          </form>
+        }
+        @if (secureMessage(); as m) {
+          <p class="message" [class.ok]="m.ok" role="status">{{ m.text }}</p>
+        }
+      </section>
+    }
+
     @if (auth.isDemo) {
       <section class="card demo">
         <h3>Demo-Modus</h3>
@@ -125,6 +203,9 @@
       <ion-button class="signout" fill="clear" color="medium" expand="block" (click)="confirmSignOut()">
         Abmelden
       </ion-button>
+      <p class="other-account">
+        <a [routerLink]="['/login']">Mit einem anderen Konto anmelden</a>
+      </p>
     }
   }
 </ion-content>

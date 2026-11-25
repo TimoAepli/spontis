@@ -1,0 +1,68 @@
+<ion-content class="ion-padding">
+  <div class="welcome">
+    <header class="brand">
+      <div class="logo" aria-hidden="true">s</div>
+      <h1>Anmelden</h1>
+      <p class="claim">Mit der E-Mail und dem Passwort,<br />die du im Profil hinterlegt hast.</p>
+    </header>
+
+    <form (ngSubmit)="submit()" novalidate>
+      <label class="field">
+        <span class="label">E-Mail</span>
+        <ion-input
+          class="sp-input"
+          name="email"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          autocapitalize="off"
+          placeholder="lea@example.ch"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event ?? '')"
+        />
+        @if (emailError(); as err) {
+          <span class="error">{{ err }}</span>
+        }
+      </label>
+
+      <label class="field">
+        <span class="label">Passwort</span>
+        <ion-input
+          class="sp-input"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event ?? '')"
+        />
+        @if (passwordError(); as err) {
+          <span class="error">{{ err }}</span>
+        }
+      </label>
+
+      @if (losesCurrent()) {
+        <p class="hint warn">
+          Auf diesem Gerät ist gerade ein Konto ohne E-Mail angemeldet. Wenn du dich mit einem anderen Konto anmeldest,
+          ist es danach nicht mehr erreichbar.
+        </p>
+      }
+
+      @if (serverError(); as err) {
+        <p class="error server" role="alert">{{ err }}</p>
+      }
+
+      <ion-button type="submit" expand="block" size="large" [disabled]="busy()">
+        @if (busy()) {
+          <ion-spinner name="crescent" />
+        } @else {
+          Anmelden
+        }
+      </ion-button>
+
+      <p class="privacy">
+        Noch kein Konto?
+        <a [routerLink]="['/willkommen']" [queryParams]="{ weiter: weiter() }">Registrieren</a>
+      </p>
+    </form>
+  </div>
+</ion-content>

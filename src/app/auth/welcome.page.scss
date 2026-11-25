@@ -72,4 +72,18 @@
   text-align: center;
   font-size: 13px;
   color: var(--sp-muted);
+
+  a {
+    color: var(--ion-color-primary);
+    font-weight: 700;
+  }
+}
+
+.login-link {
+  font-size: 15px;
+}
+
+.hint.warn {
+  margin: 0 0 16px;
+  color: #8a5a00;
 }
