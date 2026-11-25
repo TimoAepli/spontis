@@ -1,0 +1,139 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/entdecken" text="Zurück" />
+    </ion-buttons>
+    <ion-title>{{ category()?.label ?? 'Aktivität' }}</ion-title>
+    @if (activity()) {
+      <ion-buttons slot="end">
+        <ion-button aria-label="Teilen" (click)="share()">
+          <ion-icon slot="icon-only" name="share-outline" />
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (loading()) {
+    <div class="center"><ion-spinner name="crescent" /></div>
+  } @else if (notFound()) {
+    @if (inviterName(); as name) {
+      <!-- Geteilter Link einer «Nur Freunde»-Aktivität, aber noch nicht befreundet -->
+      <div class="locked ion-padding">
+        <div class="lock" aria-hidden="true">🔒</div>
+        <p class="sp-empty-title">Nur für Freunde von {{ name }}</p>
+        <p class="muted">
+          Sende {{ name }} eine Freundschaftsanfrage. Sobald die Anfrage angenommen ist, siehst du die Aktivität und
+          kannst beitreten. (Falls sie schon vorbei ist, siehst du sie nicht mehr.)
+        </p>
+        @if (requestMessage(); as m) {
+          <p class="request-msg" [class.ok]="m.ok" role="status">{{ m.text }}</p>
+        } @else {
+          <ion-button expand="block" size="large" [disabled]="busy()" (click)="requestFriendFromLink()">
+            Freundschaftsanfrage senden
+          </ion-button>
+        }
+      </div>
+    } @else {
+      <div class="sp-empty ion-padding">
+        <p class="sp-empty-title">Diese Aktivität ist nicht sichtbar</p>
+        <p>Sie ist vorbei, wurde gelöscht oder ist nur für Freunde der Person sichtbar, die sie erstellt hat.</p>
+      </div>
+    }
+  } @else if (activity(); as a) {
+    @let p = progress()!;
+
+    <div class="map-box">
+      <app-static-map [lat]="a.lat" [lng]="a.lng" [emoji]="category()!.emoji" />
+    </div>
+
+    <div class="content">
+      <header class="head">
+        <p class="time">{{ time() }}</p>
+        <h1>{{ a.title }}</h1>
+        <p class="meta">
+          <a [href]="mapsLink()" target="_blank" rel="noopener">📍 {{ a.placeName }}</a>
+        </p>
+        <p class="meta">von {{ a.creatorFirstName }} · {{ visibilityLabel() }}</p>
+      </header>
+
+      <!-- Zusagezähler -->
+      <section class="status" [class.happening]="p.isHappening" [class.pop]="justHappened()" aria-live="polite">
+        <div class="count-row">
+          <span class="count">{{ p.count }}<small>/{{ p.min }}</small></span>
+          <span class="count-label">dabei</span>
+          @if (p.isHappening) {
+            <span class="badge">🎉 Findet statt</span>
+          }
+        </div>
+        <div class="progress" role="progressbar" [attr.aria-valuenow]="p.count" [attr.aria-valuemax]="p.min">
+          <div class="bar" [style.width.%]="p.ratio * 100"></div>
+        </div>
+        @if (!p.isHappening) {
+          <p class="hint">{{ hint() }}</p>
+        }
+      </section>
+
+      <ion-button class="share" expand="block" fill="outline" (click)="share()">
+        <ion-icon slot="start" name="share-outline" />
+        In den Gruppenchat teilen
+      </ion-button>
+
+      <!-- Zugesagte -->
+      <section class="people">
+        <h2>Dabei</h2>
+        <ul>
+          @for (person of participants(); track person.userId) {
+            <li>
+              <span class="avatar" aria-hidden="true">{{ person.firstName.charAt(0).toUpperCase() }}</span>
+              <span class="name">
+                {{ person.firstName }}
+                @if (person.userId === myId()) {
+                  <span class="you">(du)</span>
+                }
+              </span>
+              @if (person.userId === a.creatorId) {
+                <span class="role">organisiert</span>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+
+      @if (isCreator()) {
+        <ion-button class="delete" fill="clear" color="danger" expand="block" (click)="confirmDelete()">
+          Aktivität löschen
+        </ion-button>
+      }
+    </div>
+  }
+</ion-content>
+
+@if (activity(); as a) {
+  <ion-footer class="ion-no-border">
+    <ion-toolbar>
+      <div class="footer">
+        @if (isCreator()) {
+          <p class="own">Du organisierst diese Aktivität.</p>
+        } @else if (a.isJoined) {
+          <ion-button expand="block" size="large" fill="outline" [disabled]="busy()" (click)="leave()">
+            @if (busy()) {
+              <ion-spinner name="crescent" />
+            } @else {
+              Doch nicht dabei
+            }
+          </ion-button>
+        } @else {
+          <ion-button expand="block" size="large" [disabled]="busy()" (click)="join()">
+            @if (busy()) {
+              <ion-spinner name="crescent" />
+            } @else {
+              Ich bin dabei
+            }
+          </ion-button>
+        }
+      </div>
+    </ion-toolbar>
+  </ion-footer>
+}

@@ -1,0 +1,249 @@
+.center {
+  display: grid;
+  place-items: center;
+  height: 50%;
+}
+
+.map-box {
+  height: 170px;
+  border-bottom: 1px solid var(--sp-line);
+}
+
+.content {
+  padding: 16px 16px 24px;
+}
+
+.head {
+  margin-bottom: 18px;
+
+  .time {
+    margin: 0;
+    font-weight: 700;
+    color: var(--ion-color-primary);
+  }
+
+  h1 {
+    margin: 4px 0 6px;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+    overflow-wrap: anywhere;
+  }
+
+  .meta {
+    margin: 2px 0;
+    color: var(--sp-muted);
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: var(--sp-line);
+      text-underline-offset: 3px;
+    }
+  }
+}
+
+// Zusagezähler
+.status {
+  padding: 16px;
+  border-radius: var(--sp-radius);
+  background: var(--sp-surface);
+  border: 2px solid transparent;
+  transition:
+    background 300ms ease,
+    border-color 300ms ease;
+
+  &.happening {
+    background: rgba(255, 200, 50, 0.18);
+    border-color: var(--ion-color-warning);
+  }
+
+  &.pop {
+    animation: pop 600ms ease;
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.count-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.count {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+
+  small {
+    font-size: 22px;
+    color: var(--sp-muted);
+    font-weight: 700;
+  }
+}
+
+.count-label {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.badge {
+  margin-left: auto;
+  align-self: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--ion-color-warning);
+  color: var(--ion-color-warning-contrast);
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.progress {
+  height: 12px;
+  border-radius: 999px;
+  background: #fff;
+  overflow: hidden;
+
+  .bar {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--ion-color-primary);
+    transition: width 400ms ease;
+  }
+}
+
+.happening .progress .bar {
+  background: var(--ion-color-warning);
+}
+
+.hint {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: var(--sp-muted);
+}
+
+// Zugesagte
+.people {
+  margin-top: 22px;
+
+  h2 {
+    margin: 0 0 8px;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    border-bottom: 1px solid var(--sp-line);
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ion-color-primary);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+  }
+
+  .name {
+    font-weight: 600;
+  }
+
+  .you {
+    font-weight: 400;
+    color: var(--sp-muted);
+  }
+
+  .role {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--sp-muted);
+  }
+}
+
+.share {
+  margin-top: 14px;
+}
+
+.locked {
+  max-width: 420px;
+  margin: 12vh auto 0;
+  text-align: center;
+
+  .lock {
+    font-size: 56px;
+    margin-bottom: 8px;
+  }
+
+  .sp-empty-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .muted {
+    color: var(--sp-muted);
+    line-height: 1.45;
+    margin: 8px 0 24px;
+  }
+
+  .request-msg {
+    font-weight: 600;
+    color: var(--ion-color-danger);
+
+    &.ok {
+      color: var(--ion-color-primary);
+    }
+  }
+}
+
+.delete {
+  margin-top: 24px;
+}
+
+.footer {
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+}
+
+.own {
+  margin: 8px 0;
+  text-align: center;
+  color: var(--sp-muted);
+}
+
+::ng-deep .sp-static-pin {
+  position: absolute;
+  font-size: 28px;
+  line-height: 1;
+  padding: 6px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--ion-color-primary);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
