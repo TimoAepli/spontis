@@ -1,0 +1,42 @@
+ion-tab-bar {
+  --border: 1px solid var(--sp-line);
+  height: 64px;
+  // Ionic setzt «contain: strict», das würde den überstehenden Plus-Knopf abschneiden.
+  contain: none;
+  overflow: visible;
+}
+
+ion-tab-button {
+  --color: var(--sp-muted);
+  --color-selected: var(--ion-color-primary);
+  font-size: 12px;
+}
+
+.plus-slot {
+  flex: 0 0 96px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100%;
+}
+
+// Grosser, runder Knopf, der über die Tab-Leiste hinausragt.
+.plus {
+  width: 64px;
+  height: 64px;
+  margin-top: -22px;
+  border: 4px solid var(--ion-background-color);
+  border-radius: 50%;
+  background: var(--ion-color-primary);
+  color: #fff;
+  font-size: 34px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 16px rgba(11, 107, 94, 0.35);
+  cursor: pointer;
+  transition: transform 120ms ease;
+
+  &:active {
+    transform: scale(0.94);
+  }
+}

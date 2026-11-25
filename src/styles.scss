@@ -1,0 +1,53 @@
+// Globale Stile von spontis (gelten in der ganzen App).
+
+html {
+  color-scheme: light;
+}
+
+// Netlify blendet im Gratis-Plan unten rechts «Powered by Netlify» ein (Pflicht, nicht abschaltbar).
+// Damit es keine Knöpfe verdeckt, bekommt es einen eigenen Streifen unter der App.
+body:has(#nl-badge-frame) {
+  background: #fff;
+
+  ion-app {
+    bottom: 56px;
+  }
+
+  .demo-badge {
+    bottom: calc(134px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+// Grosse Touch-Ziele: Buttons mindestens 48 px hoch.
+ion-button {
+  --border-radius: 12px;
+  min-height: 48px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+// Eingabefeld mit grauem Hintergrund, gut sichtbar und gross genug für den Daumen.
+ion-input.sp-input {
+  --background: var(--sp-surface);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --border-radius: 12px;
+  --highlight-color-focused: var(--ion-color-primary);
+  min-height: 52px;
+  border-radius: 12px;
+  font-size: 17px;
+}
+
+// Leerer Zustand (z. B. «Heute ist noch nichts los»)
+.sp-empty {
+  margin-top: 25vh;
+  text-align: center;
+  color: var(--sp-muted);
+
+  .sp-empty-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ion-text-color);
+    margin-bottom: 4px;
+  }
+}

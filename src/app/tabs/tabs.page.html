@@ -1,0 +1,19 @@
+<ion-tabs>
+  <ion-tab-bar slot="bottom">
+    <ion-tab-button tab="entdecken">
+      <ion-icon name="compass-outline" aria-hidden="true" />
+      <ion-label>Entdecken</ion-label>
+    </ion-tab-button>
+
+    <div class="plus-slot">
+      <button class="plus" type="button" aria-label="Aktivität erstellen" (click)="openCreate()">
+        <ion-icon name="add" aria-hidden="true" />
+      </button>
+    </div>
+
+    <ion-tab-button tab="profil">
+      <ion-icon name="person-outline" aria-hidden="true" />
+      <ion-label>Profil</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>
