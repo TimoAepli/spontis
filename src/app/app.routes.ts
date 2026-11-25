@@ -29,8 +29,8 @@ export const routes: Routes = [
     loadComponent: () => import('./create/create.page').then((m) => m.CreatePage),
   },
   {
+    // Ohne Routen-Schutz: Geteilte Links funktionieren auch ohne Konto (Beitritt als Gast)
     path: 'a/:id',
-    canActivate: [requireProfile],
     loadComponent: () =>
       import('./activity/activity-detail.page').then((m) => m.ActivityDetailPage),
   },

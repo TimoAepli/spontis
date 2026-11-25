@@ -190,34 +190,43 @@
   margin-top: 14px;
 }
 
-.locked {
-  max-width: 420px;
-  margin: 12vh auto 0;
-  text-align: center;
-
-  .lock {
-    font-size: 56px;
-    margin-bottom: 8px;
-  }
-
-  .sp-empty-title {
-    margin: 0;
-    font-size: 20px;
+// Gast-Beitritt (ohne Konto über einen Link)
+.guest {
+  .guest-label {
+    display: block;
     font-weight: 700;
+    margin-bottom: 6px;
   }
 
-  .muted {
-    color: var(--sp-muted);
-    line-height: 1.45;
-    margin: 8px 0 24px;
+  .guest-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    ion-input {
+      flex: 1;
+    }
+
+    ion-button {
+      margin: 0;
+      min-height: 52px;
+    }
   }
 
-  .request-msg {
-    font-weight: 600;
+  .guest-error {
+    margin: 6px 0 0;
+    font-size: 13px;
     color: var(--ion-color-danger);
+  }
 
-    &.ok {
+  .guest-links {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: var(--sp-muted);
+
+    a {
       color: var(--ion-color-primary);
+      font-weight: 600;
     }
   }
 }

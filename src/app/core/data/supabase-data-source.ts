@@ -56,24 +56,26 @@ export class SupabaseDataSource extends DataSource {
     return (data as FeedRow[]).map(toActivity);
   }
 
+  /**
+   * Detail über den Link-Zugriff (Funktion activity_by_link): funktioniert auch bei
+   * «Nur Freunde» ohne Freundschaft und ohne Konto – wer die ID hat, hat den Link.
+   */
   async getActivity(id: string): Promise<Activity | null> {
     if (!UUID.test(id)) return null; // ungültiger Link
-    const { data, error } = await supabase.from('activity_feed').select('*').eq('id', id).maybeSingle();
+    const { data, error } = await supabase.rpc('activity_by_link', { p_id: id });
     if (error) throw error;
-    return data ? toActivity(data as FeedRow) : null;
+    const rows = data as FeedRow[];
+    return rows.length > 0 ? toActivity(rows[0]) : null;
   }
 
   async listParticipants(activityId: string): Promise<Participant[]> {
-    const { data, error } = await supabase
-      .from('participants')
-      .select('user_id, joined_at, profiles(first_name)')
-      .eq('activity_id', activityId)
-      .order('joined_at', { ascending: true });
+    if (!UUID.test(activityId)) return [];
+    const { data, error } = await supabase.rpc('participants_by_link', { p_id: activityId });
     if (error) throw error;
-    type Row = { user_id: string; joined_at: string; profiles: { first_name: string } | null };
-    return (data as unknown as Row[]).map((r) => ({
+    type Row = { user_id: string; first_name: string; joined_at: string };
+    return (data as Row[]).map((r) => ({
       userId: r.user_id,
-      firstName: r.profiles?.first_name ?? '?',
+      firstName: r.first_name,
       joinedAt: new Date(r.joined_at),
     }));
   }
@@ -144,7 +146,7 @@ export class SupabaseDataSource extends DataSource {
       return {
         userId: incoming ? r.user_id : r.friend_id,
         firstName: other?.first_name ?? '?',
-        username: other?.username ?? '',
+        username: other?.username ?? '', // Gäste haben keinen Benutzernamen
         status: r.status,
         direction: incoming ? 'incoming' : 'outgoing',
       };

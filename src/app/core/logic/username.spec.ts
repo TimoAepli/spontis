@@ -21,10 +21,10 @@ describe('Benutzername', () => {
   });
 });
 
-describe('Vorname', () => {
+describe('Anzeigename', () => {
   it('muss ausgefüllt und höchstens 40 Zeichen lang sein', () => {
     expect(firstNameError('Lea')).toBeNull();
-    expect(firstNameError('   ')).toBe('Bitte gib deinen Vornamen an.');
+    expect(firstNameError('   ')).toBe('Bitte gib deinen Anzeigenamen an.');
     expect(firstNameError('x'.repeat(41))).toBe('Höchstens 40 Zeichen.');
   });
 });

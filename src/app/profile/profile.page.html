@@ -13,7 +13,7 @@
     <section class="me">
       <div class="avatar" aria-hidden="true">{{ p.first_name.charAt(0).toUpperCase() }}</div>
       <h2>{{ p.first_name }}</h2>
-      <p class="username">&#64;{{ p.username }}</p>
+      <p class="username">{{ p.username ? '@' + p.username : 'Gast' }}</p>
     </section>
 
     <!-- Offene Anfragen an mich: zuoberst, damit man sie sieht -->
@@ -26,7 +26,7 @@
               <span class="avatar small" aria-hidden="true">{{ f.firstName.charAt(0).toUpperCase() }}</span>
               <span class="who">
                 <strong>{{ f.firstName }}</strong>
-                <small>&#64;{{ f.username }}</small>
+                <small>{{ f.username ? '@' + f.username : 'Gast' }}</small>
               </span>
               <ion-button size="small" (click)="accept(f)">Annehmen</ion-button>
               <ion-button size="small" fill="clear" color="medium" (click)="decline(f)">Ablehnen</ion-button>
@@ -88,7 +88,7 @@
               <span class="avatar small" aria-hidden="true">{{ f.firstName.charAt(0).toUpperCase() }}</span>
               <span class="who">
                 <strong>{{ f.firstName }}</strong>
-                <small>&#64;{{ f.username }}</small>
+                <small>{{ f.username ? '@' + f.username : 'Gast' }}</small>
               </span>
               <ion-button size="small" fill="clear" color="medium" (click)="confirmRemove(f)">Entfernen</ion-button>
             </li>
@@ -104,7 +104,7 @@
               <span class="avatar small muted-avatar" aria-hidden="true">{{ f.firstName.charAt(0).toUpperCase() }}</span>
               <span class="who">
                 <strong>{{ f.firstName }}</strong>
-                <small>&#64;{{ f.username }}</small>
+                <small>{{ f.username ? '@' + f.username : 'Gast' }}</small>
               </span>
               <ion-button size="small" fill="clear" color="medium" (click)="decline(f)">Zurückziehen</ion-button>
             </li>

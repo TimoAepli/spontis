@@ -18,29 +18,10 @@
   @if (loading()) {
     <div class="center"><ion-spinner name="crescent" /></div>
   } @else if (notFound()) {
-    @if (inviterName(); as name) {
-      <!-- Geteilter Link einer «Nur Freunde»-Aktivität, aber noch nicht befreundet -->
-      <div class="locked ion-padding">
-        <div class="lock" aria-hidden="true">🔒</div>
-        <p class="sp-empty-title">Nur für Freunde von {{ name }}</p>
-        <p class="muted">
-          Sende {{ name }} eine Freundschaftsanfrage. Sobald die Anfrage angenommen ist, siehst du die Aktivität und
-          kannst beitreten. (Falls sie schon vorbei ist, siehst du sie nicht mehr.)
-        </p>
-        @if (requestMessage(); as m) {
-          <p class="request-msg" [class.ok]="m.ok" role="status">{{ m.text }}</p>
-        } @else {
-          <ion-button expand="block" size="large" [disabled]="busy()" (click)="requestFriendFromLink()">
-            Freundschaftsanfrage senden
-          </ion-button>
-        }
-      </div>
-    } @else {
-      <div class="sp-empty ion-padding">
-        <p class="sp-empty-title">Diese Aktivität ist nicht sichtbar</p>
-        <p>Sie ist vorbei, wurde gelöscht oder ist nur für Freunde der Person sichtbar, die sie erstellt hat.</p>
-      </div>
-    }
+    <div class="sp-empty ion-padding">
+      <p class="sp-empty-title">Diese Aktivität gibt es nicht mehr</p>
+      <p>Sie ist schon vorbei oder wurde gelöscht. Aktivitäten gelten immer nur für heute.</p>
+    </div>
   } @else if (activity(); as a) {
     @let p = progress()!;
 
@@ -114,7 +95,39 @@
   <ion-footer class="ion-no-border">
     <ion-toolbar>
       <div class="footer">
-        @if (isCreator()) {
+        @if (!auth.isRegistered()) {
+          <!-- Über einen Link ohne Konto geöffnet: als Gast beitreten -->
+          <form class="guest" (ngSubmit)="joinAsGuest()" novalidate>
+            <label class="guest-label" for="guest-name">Wie heisst du?</label>
+            <div class="guest-row">
+              <ion-input
+                id="guest-name"
+                class="sp-input"
+                name="guestName"
+                placeholder="Dein Anzeigename"
+                autocomplete="given-name"
+                [maxlength]="40"
+                [ngModel]="guestName()"
+                (ngModelChange)="guestName.set($event ?? '')"
+              />
+              <ion-button type="submit" size="large" [disabled]="busy()">
+                @if (busy()) {
+                  <ion-spinner name="crescent" />
+                } @else {
+                  Ich bin dabei
+                }
+              </ion-button>
+            </div>
+            @if (guestError(); as err) {
+              <p class="guest-error">{{ err }}</p>
+            }
+            <p class="guest-links">
+              Ohne Konto, nur mit Namen. ·
+              <a [routerLink]="['/login']" [queryParams]="{ weiter: returnUrl() }">Anmelden</a> ·
+              <a [routerLink]="['/willkommen']" [queryParams]="{ weiter: returnUrl() }">Konto erstellen</a>
+            </p>
+          </form>
+        } @else if (isCreator()) {
           <p class="own">Du organisierst diese Aktivität.</p>
         } @else if (a.isJoined) {
           <ion-button expand="block" size="large" fill="outline" [disabled]="busy()" (click)="leave()">

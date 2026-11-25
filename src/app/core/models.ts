@@ -1,7 +1,8 @@
 /** Profil einer Person (Tabelle `profiles`). */
 export interface Profile {
   id: string;
-  username: string;
+  /** null = Gast (nur mit Anzeigename über einen Link beigetreten) */
+  username: string | null;
   first_name: string;
   invite_code: string;
 }

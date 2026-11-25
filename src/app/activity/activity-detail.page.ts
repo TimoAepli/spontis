@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, computed, effect, inject, input, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import {
   AlertController,
   IonBackButton,
@@ -9,6 +10,7 @@ import {
   IonFooter,
   IonHeader,
   IonIcon,
+  IonInput,
   IonSpinner,
   IonTitle,
   IonToolbar,
@@ -18,24 +20,25 @@ import { addIcons } from 'ionicons';
 import { shareOutline } from 'ionicons/icons';
 import { AuthService } from '../core/auth.service';
 import { DataSource } from '../core/data/data-source';
-import {
-  friendRequestMessage,
-  isFriendRequestSuccess,
-  isValidInviteCode,
-  normalizeInviteCode,
-} from '../core/logic/friends';
 import { missingHint, participation } from '../core/logic/participation';
 import { sharePath, shareText } from '../core/logic/share-text';
-import { MetricsService } from '../core/metrics.service';
-import { appLink, ShareService } from '../core/share.service';
 import { formatTime, relativeStart } from '../core/logic/time';
+import { firstNameError } from '../core/logic/username';
+import { MetricsService } from '../core/metrics.service';
 import { Activity, CATEGORIES, Participant, VISIBILITY_LABELS } from '../core/models';
+import { appLink, ShareService } from '../core/share.service';
 import { StaticMapComponent } from './static-map.component';
 
-/** Detailseite: Infos, Zusagezähler in Echtzeit, Vornamen, Beitreten/Austreten. */
+/**
+ * Detailseite: Infos, Zusagezähler in Echtzeit, Anzeigenamen, Beitreten/Austreten.
+ * Funktioniert auch über einen geteilten Link ohne Konto: Dann tritt man als Gast bei
+ * (nur Anzeigename).
+ */
 @Component({
   selector: 'app-activity-detail',
   imports: [
+    FormsModule,
+    RouterLink,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -46,6 +49,7 @@ import { StaticMapComponent } from './static-map.component';
     IonButton,
     IonSpinner,
     IonIcon,
+    IonInput,
     StaticMapComponent,
   ],
   templateUrl: './activity-detail.page.html',
@@ -53,7 +57,7 @@ import { StaticMapComponent } from './static-map.component';
 })
 export class ActivityDetailPage implements OnInit, OnDestroy {
   private readonly data = inject(DataSource);
-  private readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly alerts = inject(AlertController);
   private readonly toasts = inject(ToastController);
@@ -62,12 +66,8 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
 
   /** Aus der URL /a/:id */
   readonly id = input.required<string>();
-  /** Einladungscode des Erstellers aus dem geteilten Link (?f=…) */
+  /** Einladungscode des Erstellers aus dem geteilten Link (?f=…) – zeigt: über Link geöffnet */
   readonly f = input<string>();
-
-  /** Für Nicht-Freunde: Name des Erstellers und Ergebnis der Anfrage */
-  readonly inviterName = signal<string | null>(null);
-  readonly requestMessage = signal<{ text: string; ok: boolean } | null>(null);
 
   readonly activity = signal<Activity | null>(null);
   readonly participants = signal<Participant[]>([]);
@@ -77,6 +77,11 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
   /** Kurz true, wenn «Findet statt» gerade eben erreicht wurde (Animation). */
   readonly justHappened = signal(false);
   readonly now = signal(new Date());
+
+  // Gast-Beitritt
+  readonly guestName = signal('');
+  readonly guestSubmitted = signal(false);
+  readonly guestError = computed(() => (this.guestSubmitted() ? firstNameError(this.guestName()) : null));
 
   readonly myId = computed(() => this.auth.profile()?.id ?? null);
   readonly isCreator = computed(() => this.activity()?.creatorId === this.myId());
@@ -104,12 +109,18 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
     const a = this.activity();
     return a ? `https://www.google.com/maps/search/?api=1&query=${a.lat},${a.lng}` : '';
   });
+  /** Ziel nach Anmelden/Registrieren: zurück zu dieser Aktivität */
+  readonly returnUrl = computed(() => `/a/${this.id()}`);
 
   private unwatch?: () => void;
   private reloadTimer?: ReturnType<typeof setTimeout>;
   private readonly clock = setInterval(() => this.now.set(new Date()), 60_000);
+  /**
+   * Echtzeit-Meldungen bekommt nur, wer die Aktivität regulär sehen darf.
+   * Wer sie nur über den Link sieht, bekommt alle 15 s den neuen Stand.
+   */
+  private readonly fallbackPoll = setInterval(() => void this.load(), 15_000);
   private wasHappening: boolean | null = null;
-  private friendPoll?: ReturnType<typeof setInterval>;
 
   constructor() {
     addIcons({ shareOutline });
@@ -125,8 +136,9 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
-    void this.load();
+  async ngOnInit(): Promise<void> {
+    await this.auth.init();
+    await this.load();
     // Echtzeit: bei jeder Änderung an dieser Aktivität neu laden
     this.unwatch = this.data.watch((changedId) => {
       if (changedId === null || changedId === this.id()) this.scheduleReload();
@@ -136,8 +148,8 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.unwatch?.();
     clearInterval(this.clock);
+    clearInterval(this.fallbackPoll);
     clearTimeout(this.reloadTimer);
-    clearInterval(this.friendPoll);
   }
 
   /** Mehrere Änderungen kurz hintereinander nur einmal laden. */
@@ -155,11 +167,6 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
       this.activity.set(activity);
       this.participants.set(participants);
       this.notFound.set(activity === null);
-      // Geteilter Link, aber nicht sichtbar → vermutlich «Nur Freunde»: Ersteller anzeigen
-      const code = this.inviteCode();
-      if (activity === null && code && this.inviterName() === null) {
-        this.inviterName.set(await this.data.nameForInviteCode(code));
-      }
     } catch (e) {
       console.error('Aktivität laden fehlgeschlagen', e);
       if (!this.activity()) this.notFound.set(true);
@@ -169,46 +176,10 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  private inviteCode(): string | null {
-    const code = normalizeInviteCode(this.f() ?? '');
-    return isValidInviteCode(code) ? code : null;
-  }
-
   async share(): Promise<void> {
     const a = this.activity();
     if (!a) return;
     await this.sharing.share({ title: a.title, text: shareText(a), url: appLink(sharePath(a)) });
-  }
-
-  /** Nicht-Freund öffnet einen geteilten Link → Freundschaftsanfrage an den Ersteller. */
-  async requestFriendFromLink(): Promise<void> {
-    const code = this.inviteCode();
-    if (!code) return;
-    this.busy.set(true);
-    try {
-      const result = await this.data.requestFriend(code);
-      this.requestMessage.set({
-        text: friendRequestMessage(result, this.inviterName() ?? undefined),
-        ok: isFriendRequestSuccess(result),
-      });
-      // Falls die Gegenseite schon angefragt hatte, sind wir jetzt Freunde → Aktivität laden
-      if (result === 'accepted' || result === 'already_friends') await this.load();
-      // Sonst alle 10 s nachschauen, ob die Anfrage angenommen wurde
-      else if (isFriendRequestSuccess(result) || result === 'pending') this.startWaitingForFriend();
-    } catch (e) {
-      console.error(e);
-      this.requestMessage.set({ text: 'Das hat nicht geklappt. Prüfe die Internetverbindung.', ok: false });
-    } finally {
-      this.busy.set(false);
-    }
-  }
-
-  private startWaitingForFriend(): void {
-    clearInterval(this.friendPoll);
-    this.friendPoll = setInterval(async () => {
-      await this.load();
-      if (this.activity()) clearInterval(this.friendPoll);
-    }, 10_000);
   }
 
   async join(): Promise<void> {
@@ -216,6 +187,17 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
       await this.data.join(this.id());
       this.metrics.activityJoined();
     }, 'Beitreten hat nicht geklappt.');
+  }
+
+  /** Ohne Konto: Gast mit Anzeigename anlegen und direkt beitreten. */
+  async joinAsGuest(): Promise<void> {
+    this.guestSubmitted.set(true);
+    if (firstNameError(this.guestName())) return;
+    await this.run(async () => {
+      if (!(await this.auth.registerGuest(this.guestName()))) throw new Error('Gast anlegen fehlgeschlagen');
+      await this.data.join(this.id());
+      this.metrics.activityJoined();
+    }, 'Beitreten hat nicht geklappt. Prüfe die Internetverbindung.');
   }
 
   async leave(): Promise<void> {

@@ -25,10 +25,10 @@ export function usernameError(input: string): string | null {
   return null;
 }
 
-/** Gibt eine Fehlermeldung auf Deutsch zurück oder null, wenn der Vorname gültig ist. */
+/** Gibt eine Fehlermeldung auf Deutsch zurück oder null, wenn der Anzeigename gültig ist. */
 export function firstNameError(input: string): string | null {
   const name = input.trim();
-  if (name.length === 0) return 'Bitte gib deinen Vornamen an.';
+  if (name.length === 0) return 'Bitte gib deinen Anzeigenamen an.';
   if (name.length > 40) return 'Höchstens 40 Zeichen.';
   return null;
 }
