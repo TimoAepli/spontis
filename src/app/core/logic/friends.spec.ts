@@ -1,4 +1,36 @@
-import { friendRequestMessage, isFriendRequestSuccess, isValidInviteCode, normalizeInviteCode } from './friends';
+import {
+  friendRequestMessage,
+  isFriendRequestSuccess,
+  isValidInviteCode,
+  normalizeInviteCode,
+  shouldOfferFriendship,
+} from './friends';
+
+describe('Pop-up Freundschaftsanfrage bei Linkaufruf', () => {
+  const base = { viaLink: true, viewerId: 'me', creatorId: 'lea', friends: [] };
+
+  it('erscheint, wenn angemeldet und noch nicht befreundet', () => {
+    expect(shouldOfferFriendship(base)).toBe(true);
+  });
+
+  it('erscheint nicht ohne Link, ohne Anmeldung oder bei eigener Aktivität', () => {
+    expect(shouldOfferFriendship({ ...base, viaLink: false })).toBe(false);
+    expect(shouldOfferFriendship({ ...base, viewerId: null })).toBe(false);
+    expect(shouldOfferFriendship({ ...base, creatorId: 'me' })).toBe(false);
+  });
+
+  it('erscheint nicht, wenn schon befreundet oder schon angefragt', () => {
+    const accepted = { userId: 'lea', status: 'accepted' as const, direction: 'outgoing' as const };
+    const outgoing = { userId: 'lea', status: 'pending' as const, direction: 'outgoing' as const };
+    expect(shouldOfferFriendship({ ...base, friends: [accepted] })).toBe(false);
+    expect(shouldOfferFriendship({ ...base, friends: [outgoing] })).toBe(false);
+  });
+
+  it('erscheint, wenn der Ersteller mich angefragt hat (Anfrage wird damit angenommen)', () => {
+    const incoming = { userId: 'lea', status: 'pending' as const, direction: 'incoming' as const };
+    expect(shouldOfferFriendship({ ...base, friends: [incoming] })).toBe(true);
+  });
+});
 
 describe('Einladungscode', () => {
   it('ignoriert Gross-/Kleinschreibung und Leerzeichen', () => {

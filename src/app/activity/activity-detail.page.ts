@@ -20,6 +20,7 @@ import { addIcons } from 'ionicons';
 import { shareOutline } from 'ionicons/icons';
 import { AuthService } from '../core/auth.service';
 import { DataSource } from '../core/data/data-source';
+import { friendRequestMessage, shouldOfferFriendship } from '../core/logic/friends';
 import { missingHint, participation } from '../core/logic/participation';
 import { sharePath, shareText } from '../core/logic/share-text';
 import { formatTime, relativeStart } from '../core/logic/time';
@@ -139,6 +140,7 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     await this.auth.init();
     await this.load();
+    void this.maybeOfferFriendship();
     // Echtzeit: bei jeder Änderung an dieser Aktivität neu laden
     this.unwatch = this.data.watch((changedId) => {
       if (changedId === null || changedId === this.id()) this.scheduleReload();
@@ -174,6 +176,43 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
       this.loading.set(false);
       this.now.set(new Date());
     }
+  }
+
+  /**
+   * Über einen Link geöffnet, angemeldet und noch nicht befreundet →
+   * Pop-up «Freundschaftsanfrage senden?». Pro Person nur einmal pro Sitzung.
+   */
+  private async maybeOfferFriendship(): Promise<void> {
+    const a = this.activity();
+    if (!a || this.f() === undefined) return;
+    const askedKey = `spontis-friend-offer-${a.creatorId}`;
+    if (sessionStorage.getItem(askedKey)) return;
+
+    const friends = this.myId() ? await this.data.listFriends().catch(() => []) : [];
+    if (!shouldOfferFriendship({ viaLink: true, viewerId: this.myId(), creatorId: a.creatorId, friends })) return;
+    sessionStorage.setItem(askedKey, '1');
+
+    const name = a.creatorFirstName;
+    const alert = await this.alerts.create({
+      header: `Mit ${name} befreundet sein?`,
+      message: `Dann siehst du in «Entdecken» auch die anderen «Nur Freunde»-Aktivitäten von ${name}.`,
+      buttons: [
+        { text: 'Später', role: 'cancel' },
+        { text: 'Anfrage senden', handler: () => void this.sendFriendRequest(a.creatorInviteCode, name) },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async sendFriendRequest(code: string, name: string): Promise<void> {
+    let text: string;
+    try {
+      text = friendRequestMessage(await this.data.requestFriend(code), name);
+    } catch {
+      text = 'Die Anfrage hat nicht geklappt. Prüfe die Internetverbindung.';
+    }
+    const toast = await this.toasts.create({ message: text, duration: 3500, position: 'top' });
+    await toast.present();
   }
 
   async share(): Promise<void> {
