@@ -1,7 +1,23 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/entdecken" text="Zurück" />
+      @if (authReady()) {
+        @if (isMember()) {
+          <ion-back-button defaultHref="/tabs/entdecken" text="Zurück" />
+        } @else {
+          <!-- Gäste und Besucher ohne Konto: statt «Zurück» zur Registrierung -->
+          <ion-button
+            class="register"
+            fill="solid"
+            color="primary"
+            size="small"
+            [routerLink]="['/willkommen']"
+            [queryParams]="{ weiter: returnUrl() }"
+          >
+            Registrieren
+          </ion-button>
+        }
+      }
     </ion-buttons>
     <ion-title>{{ category()?.label ?? 'Aktivität' }}</ion-title>
     @if (activity()) {

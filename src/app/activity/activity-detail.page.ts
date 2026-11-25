@@ -84,6 +84,11 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
   readonly guestSubmitted = signal(false);
   readonly guestError = computed(() => (this.guestSubmitted() ? firstNameError(this.guestName()) : null));
 
+  /** Erst nach dem Laden des Kontos wissen wir, ob «Zurück» oder «Registrieren» angezeigt wird. */
+  readonly authReady = signal(false);
+  /** Volles Konto? Sonst (Gast oder ohne Konto) gibt es nur diese Eventseite → «Registrieren» statt «Zurück». */
+  readonly isMember = computed(() => this.auth.isRegistered() && !this.auth.isGuest());
+
   readonly myId = computed(() => this.auth.profile()?.id ?? null);
   readonly isCreator = computed(() => this.activity()?.creatorId === this.myId());
   readonly category = computed(() => {
@@ -139,6 +144,7 @@ export class ActivityDetailPage implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     await this.auth.init();
+    this.authReady.set(true);
     await this.load();
     void this.maybeOfferFriendship();
     // Echtzeit: bei jeder Änderung an dieser Aktivität neu laden
