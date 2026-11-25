@@ -1,0 +1,81 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/entdecken" text="App" />
+    </ion-buttons>
+    <ion-title>Testseite</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <p class="intro">
+    Gemessen wird nur auf diesem Gerät: wie lange es vom Öffnen der App (oder «Neuer Testlauf») bis zur ersten
+    erstellten bzw. beigetretenen Aktivität dauert. Keine Namen, keine Orte, keine Inhalte.
+    @if (demo) {
+      <strong>Demo-Modus ist aktiv.</strong>
+    }
+  </p>
+
+  <!-- Testlauf -->
+  <section class="card run">
+    <div>
+      <span class="label">Aktueller Testlauf</span>
+      <strong class="big">#{{ metrics.run() }}</strong>
+    </div>
+    <div>
+      <span class="label">Zeit läuft seit</span>
+      <strong class="big">{{ format(elapsed() * 1000) }}</strong>
+    </div>
+  </section>
+  <ion-button expand="block" (click)="newRun()">Neuer Testlauf (nächste Testperson)</ion-button>
+  <p class="help">Vor jeder Testperson drücken, dann das Handy übergeben und auf «App» tippen.</p>
+
+  <!-- Auswertung -->
+  <h2>Auswertung</h2>
+  <table class="summary">
+    <thead>
+      <tr>
+        <th>Messpunkt</th>
+        <th>n</th>
+        <th>Median</th>
+        <th>Min–Max</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (s of summary(); track s.type) {
+        <tr>
+          <td>{{ labels[s.type] }}</td>
+          <td>{{ s.count }}</td>
+          <td class="strong">{{ s.count ? format(s.medianMs) : '–' }}</td>
+          <td>{{ s.count ? format(s.minMs) + ' – ' + format(s.maxMs) : '–' }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  <p class="help">
+    Ausgewertet werden nur {{ demo ? 'Demo-Messungen' : 'echte Messungen (ohne Demo)' }}. «Öffnen → …» zählt pro
+    Testlauf nur das erste Mal.
+  </p>
+
+  <!-- Einzelwerte -->
+  <h2>Letzte Messungen</h2>
+  @if (recent().length === 0) {
+    <p class="help">Noch keine Messungen.</p>
+  } @else {
+    <ul class="list">
+      @for (e of recent(); track $index) {
+        <li>
+          <span class="run-no">#{{ e.run }}</span>
+          <span class="what">{{ labels[e.type] }}@if (e.demo) {<em> · Demo</em>}</span>
+          <strong>{{ format(e.ms) }}</strong>
+          <small>{{ time(e.at) }}</small>
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="actions">
+    <ion-button expand="block" fill="outline" (click)="copyCsv()">Als CSV kopieren (Excel)</ion-button>
+    <ion-button expand="block" fill="clear" color="danger" (click)="confirmClear()">Alle Messungen löschen</ion-button>
+  </div>
+</ion-content>
