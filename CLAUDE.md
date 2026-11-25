@@ -10,7 +10,7 @@ Plan und Zeitplan: `PLAN.md`. Änderungen mit Grund: `CHANGELOG.md`.
 - Supabase (`@supabase/supabase-js`): Anonymous Sign-In, PostgreSQL mit RLS, Realtime
 - Karte: Leaflet + OpenStreetMap-Kacheln, Ortssuche über Nominatim
 - Unit-Tests: Vitest über `ng test` (Konfiguration in `vitest.config.ts`)
-- Hosting: Netlify (`netlify.toml`)
+- Hosting: Vercel (`vercel.json`)
 - Node 24 oder neuer
 
 ## Befehle
@@ -20,9 +20,9 @@ Plan und Zeitplan: `PLAN.md`. Änderungen mit Grund: `CHANGELOG.md`.
 | `npm start` | Entwicklungsserver auf http://localhost:4200 |
 | `npm run build` | Production-Build nach `dist/spontis/browser` |
 | `npx ng test --watch=false` | Unit-Tests einmal ausführen |
-| `npx netlify-cli deploy --prod --dir dist/spontis/browser` | Nach `npm run build`: veröffentlichen auf https://spontis-sg.netlify.app |
+| `npx vercel deploy --prod --yes` | Veröffentlichen auf https://spontis-sg.vercel.app (Vercel baut selbst) |
 
-Öffentliche Adresse: https://spontis-sg.netlify.app · Demo: `/?demo=1` · Testseite: `/test`
+Öffentliche Adresse: https://spontis-sg.vercel.app · Demo: `/?demo=1` · Testseite: `/test`
 
 ## Ordner
 - `src/app/core/logic/` – reine Logik ohne Angular (Zusagezähler, Sichtbarkeit, «heute», Distanz). Hier gehören die Unit-Tests hin.

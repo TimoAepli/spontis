@@ -48,32 +48,28 @@ Danach http://localhost:4200 öffnen. Für die Handy-Ansicht im Browser die Entw
 
 Hinweis: Supabase pausiert Gratis-Projekte nach 7 Tagen ohne Aktivität. Vor Tests und Pitch das Dashboard öffnen und das Projekt bei Bedarf wieder starten.
 
-## Deployment (Netlify)
+## Deployment (Vercel)
 
-Die PWA läuft gratis auf Netlify. Die Einstellungen stehen in `netlify.toml`: Build mit `npm run build`, veröffentlicht wird `dist/spontis/browser`, und alle Pfade wie `/a/…` oder `/f/…` führen auf die App.
+Die PWA läuft gratis auf Vercel: **https://spontis-sg.vercel.app**
+Die Einstellungen stehen in `vercel.json`: Build mit `npm run build`, veröffentlicht wird `dist/spontis/browser`. Alle Pfade wie `/a/…`, `/f/…` oder `/login` führen auf die App.
 
 **Erstes Mal** (einmalig, im Projektordner):
 ```powershell
-npx netlify-cli login
+npx vercel login
 ```
 ```powershell
-npx netlify-cli sites:create --name spontis-sg
-```
-```powershell
-npx netlify-cli link --name spontis-sg
+npx vercel link --yes --project spontis-sg
 ```
 
-**Neue Version veröffentlichen:**
+**Neue Version veröffentlichen** (Vercel baut selbst):
 ```powershell
-npm run build
-```
-```powershell
-npx netlify-cli deploy --prod --dir dist/spontis/browser
+npx vercel deploy --prod --yes
 ```
 
 - Geöffnete Apps laden die neue Version beim nächsten Start automatisch (Service Worker + Update-Prüfung).
 - Ein Gratis-Supabase-Projekt pausiert nach 7 Tagen ohne Nutzung. Vor Tests und Pitch das Dashboard öffnen.
-- Alternative ohne Kommandozeile: den Ordner `dist/spontis/browser` auf [app.netlify.com/drop](https://app.netlify.com/drop) ziehen. Dabei gehen aber die Weiterleitungen aus `netlify.toml` verloren, deshalb ist die Kommandozeile besser.
+- Optional: Mit `npx vercel git connect` veröffentlicht Vercel bei jedem Push auf GitHub automatisch.
+- Früher lief die App auf Netlify. Dort blendet der Gratis-Plan ein Pflicht-Abzeichen «Powered by Netlify» ein, darum der Wechsel.
 
 ### Auf dem Handy installieren
 - **Android (Chrome):** Link öffnen → Menü ⋮ → «App installieren» bzw. «Zum Startbildschirm hinzufügen».

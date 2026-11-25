@@ -38,3 +38,6 @@ Ab den Tests mit der Zielgruppe (03.–05.12.2026) gilt das Format:
 
 - **Rückmeldung aus Test:** Über einen Link kommen oft neue Leute dazu, aber man wird nicht automatisch befreundet.
   **→ Anpassung:** Wer angemeldet einen Link öffnet und mit dem Ersteller noch nicht befreundet ist, bekommt ein Pop-up «Mit Lea befreundet sein?» mit «Anfrage senden». Es erscheint pro Person einmal pro Sitzung.
+
+- **Rückmeldung aus Test:** Das Abzeichen «Powered by Netlify» stört und wirkt unprofessionell.
+  **→ Anpassung:** Hosting zu **Vercel** gewechselt (gratis, ohne Abzeichen). Neue Adresse: **https://spontis-sg.vercel.app**. Der Streifen für das Abzeichen ist entfernt, die App geht wieder bis zum unteren Rand.

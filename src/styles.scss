@@ -4,20 +4,6 @@ html {
   color-scheme: light;
 }
 
-// Netlify blendet im Gratis-Plan unten rechts «Powered by Netlify» ein (Pflicht, nicht abschaltbar).
-// Damit es keine Knöpfe verdeckt, bekommt es einen eigenen Streifen unter der App.
-body:has(#nl-badge-frame) {
-  background: #fff;
-
-  ion-app {
-    bottom: 56px;
-  }
-
-  .demo-badge {
-    bottom: calc(134px + env(safe-area-inset-bottom)) !important;
-  }
-}
-
 // Grosse Touch-Ziele: Buttons mindestens 48 px hoch.
 ion-button {
   --border-radius: 12px;
