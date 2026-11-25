@@ -1,0 +1,65 @@
+<ion-content class="ion-padding">
+  <div class="welcome">
+    <header class="brand">
+      <div class="logo" aria-hidden="true">s</div>
+      <h1>spontis</h1>
+      <p class="claim">Heute spontan etwas unternehmen.<br />Ein Klick, und du bist dabei.</p>
+    </header>
+
+    <form (ngSubmit)="submit()" novalidate>
+      <label class="field">
+        <span class="label">Benutzername</span>
+        <ion-input
+          class="sp-input"
+          name="username"
+          placeholder="z. B. lea_sg"
+          autocapitalize="off"
+          autocomplete="username"
+          [spellcheck]="false"
+          [maxlength]="24"
+          [ngModel]="username()"
+          (ngModelChange)="username.set($event ?? '')"
+        />
+        @if (submitted() && usernameError(); as err) {
+          <span class="error">{{ err }}</span>
+        } @else if (username() && usernamePreview() !== username()) {
+          <span class="hint">Wird gespeichert als «{{ usernamePreview() }}»</span>
+        } @else {
+          <span class="hint">Damit finden dich deine Freunde.</span>
+        }
+      </label>
+
+      <label class="field">
+        <span class="label">Vorname</span>
+        <ion-input
+          class="sp-input"
+          name="firstName"
+          placeholder="z. B. Lea"
+          autocomplete="given-name"
+          [maxlength]="40"
+          [ngModel]="firstName()"
+          (ngModelChange)="firstName.set($event ?? '')"
+        />
+        @if (submitted() && firstNameError(); as err) {
+          <span class="error">{{ err }}</span>
+        } @else {
+          <span class="hint">Wird bei deinen Zusagen angezeigt.</span>
+        }
+      </label>
+
+      @if (serverError(); as err) {
+        <p class="error server" role="alert">{{ err }}</p>
+      }
+
+      <ion-button type="submit" expand="block" size="large" [disabled]="busy()">
+        @if (busy()) {
+          <ion-spinner name="crescent" />
+        } @else {
+          Los geht's
+        }
+      </ion-button>
+
+      <p class="privacy">Kein Passwort, keine E-Mail. Dein Konto bleibt in diesem Browser gespeichert.</p>
+    </form>
+  </div>
+</ion-content>
