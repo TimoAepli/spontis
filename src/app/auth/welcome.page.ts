@@ -5,7 +5,11 @@ import { IonButton, IonContent, IonInput, IonSpinner } from '@ionic/angular/stan
 import { AuthService } from '../core/auth.service';
 import { firstNameError, normalizeUsername, usernameError } from '../core/logic/username';
 
-/** Registrierung: Benutzername + Vorname, mehr nicht. */
+/**
+ * Registrierung: Benutzername + Anzeigename, mehr nicht.
+ * Gäste landen ebenfalls hier, sobald sie mehr als eine Eventseite sehen wollen:
+ * Ihr Anzeigename ist vorausgefüllt, und ihr Gast-Konto wird zum vollen Konto.
+ */
 @Component({
   selector: 'app-welcome',
   imports: [FormsModule, RouterLink, IonContent, IonInput, IonButton, IonSpinner],
@@ -13,14 +17,14 @@ import { firstNameError, normalizeUsername, usernameError } from '../core/logic/
   styleUrl: './welcome.page.scss',
 })
 export class WelcomePage {
-  private readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
   /** Zielseite nach der Registrierung (z. B. ein geteilter Aktivitäts-Link). */
   readonly weiter = input<string>();
 
   readonly username = signal('');
-  readonly firstName = signal('');
+  readonly firstName = signal(this.auth.profile()?.first_name ?? '');
   readonly submitted = signal(false);
   readonly busy = signal(false);
   readonly serverError = signal<string | null>(null);

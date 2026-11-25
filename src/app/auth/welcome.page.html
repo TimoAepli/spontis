@@ -3,7 +3,13 @@
     <header class="brand">
       <div class="logo" aria-hidden="true">s</div>
       <h1>spontis</h1>
-      <p class="claim">Heute spontan etwas unternehmen.<br />Ein Klick, und du bist dabei.</p>
+      @if (auth.isGuest()) {
+        <p class="claim">
+          Du bist als Gast dabei. Wähle einen Benutzernamen,<br />um alles zu sehen und selbst etwas zu starten.
+        </p>
+      } @else {
+        <p class="claim">Heute spontan etwas unternehmen.<br />Ein Klick, und du bist dabei.</p>
+      }
     </header>
 
     <form (ngSubmit)="submit()" novalidate>

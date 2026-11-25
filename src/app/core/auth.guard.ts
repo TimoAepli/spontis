@@ -2,19 +2,22 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 
-/** Nur mit Profil: sonst zur Willkommen-Seite, danach zurück zur gewünschten Seite (z. B. geteilter Link). */
+/**
+ * Nur mit vollem Konto (Benutzername). Ohne Konto oder als Gast → Registrierung,
+ * danach zurück zur gewünschten Seite. Gäste dürfen nur Eventseiten (/a/:id) sehen.
+ */
 export const requireProfile: CanActivateFn = async (_route, state) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   await auth.init();
-  if (auth.isRegistered()) return true;
+  if (auth.isRegistered() && !auth.isGuest()) return true;
   return router.createUrlTree(['/willkommen'], { queryParams: { weiter: state.url } });
 };
 
-/** Willkommen-Seite nur ohne Profil. */
+/** Registrierung nur ohne volles Konto (Gäste dürfen hier ihr Konto vervollständigen). */
 export const requireNoProfile: CanActivateFn = async () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   await auth.init();
-  return auth.isRegistered() ? router.createUrlTree(['/tabs/entdecken']) : true;
+  return auth.isRegistered() && !auth.isGuest() ? router.createUrlTree(['/tabs/entdecken']) : true;
 };

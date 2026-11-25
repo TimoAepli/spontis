@@ -24,7 +24,6 @@ import {
   normalizeInviteCode,
 } from '../core/logic/friends';
 import { emailError, passwordError } from '../core/logic/account';
-import { usernameError } from '../core/logic/username';
 import { Friend } from '../core/models';
 import { appLink, ShareService } from '../core/share.service';
 
@@ -69,12 +68,6 @@ export class ProfilePage implements ViewWillEnter {
   readonly securePasswordError = computed(() =>
     this.secureSubmitted() ? passwordError(this.securePassword()) : null,
   );
-
-  // Benutzername für Gäste
-  readonly newUsername = signal('');
-  readonly usernameSubmitted = signal(false);
-  readonly usernameMessage = signal<string | null>(null);
-  readonly newUsernameError = computed(() => (this.usernameSubmitted() ? usernameError(this.newUsername()) : null));
 
   readonly incoming = computed(() =>
     this.friendships().filter((f) => f.status === 'pending' && f.direction === 'incoming'),
@@ -198,17 +191,6 @@ export class ProfilePage implements ViewWillEnter {
     };
     this.secureMessage.set(messages[result]);
     if (result === 'ok') this.securePassword.set('');
-  }
-
-  // ---------- Benutzername für Gäste ----------
-
-  async saveUsername(): Promise<void> {
-    this.usernameSubmitted.set(true);
-    this.usernameMessage.set(null);
-    if (usernameError(this.newUsername())) return;
-    const result = await this.auth.chooseUsername(this.newUsername());
-    if (result === 'username_taken') this.usernameMessage.set('Dieser Benutzername ist schon vergeben.');
-    else if (result === 'error') this.usernameMessage.set('Das hat nicht geklappt.');
   }
 
   async confirmSignOut(): Promise<void> {

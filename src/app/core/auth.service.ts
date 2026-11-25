@@ -66,6 +66,8 @@ export class AuthService {
 
   async register(usernameInput: string, firstNameInput: string): Promise<RegisterResult> {
     if (this.isDemo) return 'ok';
+    // Gast registriert sich: dasselbe Konto bekommt einen Benutzernamen (Zusagen bleiben erhalten)
+    if (this.isGuest()) return this.upgradeGuest(usernameInput, firstNameInput);
     if (!(await this.ensureSession())) return 'error';
 
     const { data, error } = await supabase
@@ -101,13 +103,13 @@ export class AuthService {
     return true;
   }
 
-  /** Gast wählt nachträglich einen Benutzernamen (wird damit zum normalen Konto). */
-  async chooseUsername(usernameInput: string): Promise<RegisterResult> {
+  /** Gast wählt einen Benutzernamen (und ggf. neuen Anzeigenamen) und wird damit zum vollen Konto. */
+  private async upgradeGuest(usernameInput: string, firstNameInput: string): Promise<RegisterResult> {
     const p = this._profile();
-    if (!p || this.isDemo) return 'error';
+    if (!p) return 'error';
     const { data, error } = await supabase
       .from('profiles')
-      .update({ username: normalizeUsername(usernameInput) })
+      .update({ username: normalizeUsername(usernameInput), first_name: firstNameInput.trim() })
       .eq('id', p.id)
       .select(PROFILE_COLUMNS)
       .single();

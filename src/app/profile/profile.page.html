@@ -114,30 +114,6 @@
     </section>
 
     @if (!auth.isDemo) {
-      <!-- Gäste: Benutzername wählen, damit Freunde sie finden -->
-      @if (auth.isGuest()) {
-        <section class="card">
-          <h3>Benutzername wählen</h3>
-          <p class="muted">Du bist als Gast dabei. Mit einem Benutzernamen wirst du zum normalen Konto.</p>
-          <form class="add-row" (ngSubmit)="saveUsername()">
-            <ion-input
-              class="sp-input"
-              name="newUsername"
-              placeholder="z. B. lea_sg"
-              autocapitalize="off"
-              [spellcheck]="false"
-              [maxlength]="24"
-              [ngModel]="newUsername()"
-              (ngModelChange)="newUsername.set($event ?? '')"
-            />
-            <ion-button type="submit">Speichern</ion-button>
-          </form>
-          @if (newUsernameError() ?? usernameMessage(); as err) {
-            <p class="message">{{ err }}</p>
-          }
-        </section>
-      }
-
       <!-- Konto sichern: E-Mail + Passwort -->
       <section class="card">
         <h3>Konto sichern</h3>
