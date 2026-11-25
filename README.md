@@ -20,25 +20,31 @@ Danach http://localhost:4200 öffnen. Für die Handy-Ansicht im Browser die Entw
 
 1. Auf [supabase.com](https://supabase.com) ein Gratis-Projekt anlegen (Region: Central EU / Zürich oder Frankfurt).
 2. **Anonyme Anmeldung einschalten:** *Authentication → Sign In / Providers → «Allow anonymous sign-ins»* aktivieren.
-   spontis braucht keine E-Mail: Man wählt nur einen Benutzernamen und den Vornamen.
-3. **Datenbank anlegen:** *SQL Editor → New query*, den Inhalt von
-   `supabase/migrations/20261125090000_init.sql` einfügen und **Run** klicken.
+   Zum Registrieren braucht spontis keine E-Mail: nur Benutzername und Anzeigename (Gäste: nur Anzeigename).
+3. **Datenbank anlegen:** *SQL Editor → New query*, nacheinander den Inhalt dieser Dateien einfügen und jeweils **Run** klicken:
+   1. `supabase/migrations/20261125090000_init.sql`
+   2. `supabase/migrations/20261126090000_link_access_guests.sql` (Gäste und Link-Zugriff)
+
    Weitere Migrationen in `supabase/migrations/` immer in der Reihenfolge des Dateinamens ausführen.
-4. **Sicherheit prüfen:** Im SQL Editor den Inhalt von `supabase/tests/rls_check.sql` ausführen.
+4. **«Konto sichern» ermöglichen:** *Authentication → Sign In / Providers → Email*: «Enable Email provider» **an**, **«Confirm email» aus**.
+   Grund: Der eingebaute Mailer von Supabase schickt nur wenige E-Mails pro Stunde. Ohne Bestätigung ist das Konto sofort gesichert.
+   Wer «Confirm email» anlässt, bekommt beim Sichern eine Bestätigungs-Mail. Das funktioniert auch, ist aber langsamer.
+5. **Sicherheit prüfen:** Im SQL Editor den Inhalt von `supabase/tests/rls_check.sql` ausführen.
    Erwartet wird die Zeile «Alle RLS-Prüfungen bestanden». Das Skript hinterlässt keine Daten.
-5. **Schlüssel eintragen:** *Project Settings → API* öffnen und **Project URL** sowie den
+6. **Schlüssel eintragen:** *Project Settings → API* öffnen und **Project URL** sowie den
    **anon public key** in `src/environments/environment.ts` eintragen.
    Der anon key ist für den Browser gedacht. Den `service_role`-Key nie in die App oder ins Git kopieren.
 
 ### Was die Datenbank absichert (Row Level Security)
 | Regel | Umsetzung |
 |---|---|
-| «Nur Freunde»-Aktivitäten sehen nur Freunde des Erstellers | Policy `activities_select` mit `are_friends()` |
+| «Nur Freunde»-Aktivitäten erscheinen in «Entdecken» nur für Freunde | Policy `activities_select` mit `are_friends()` |
+| Wer den Link hat, sieht die Aktivität und kann beitreten (auch ohne Konto als Gast) | Funktionen `activity_by_link()`, `participants_by_link()`, Policy `participants_insert` |
 | Aktivitäten verschwinden nach Ende des Tages | `activities_select` zeigt nur `starts_at` von heute (Zeitzone Zürich) |
-| Beitreten nur zu sichtbaren Aktivitäten, nur für sich selbst | Policy `participants_insert` |
+| Beitreten nur zu Aktivitäten von heute, nur für sich selbst | Policy `participants_insert` |
 | Freundschaft nur über Einladungscode, annehmen nur durch Empfänger | Funktion `request_friend()`, Policy `friendships_accept` |
 | «Gesponsert» kann die App nicht selbst setzen | Spaltenrechte auf `activities` |
-| Ohne Anmeldung kein Zugriff | Alle Rechte für die Rolle `anon` entzogen |
+| Ohne Anmeldung nur die Link-Vorschau, kein Beitreten und keine Listen | Rechte für die Rolle `anon` entzogen |
 
 Hinweis: Supabase pausiert Gratis-Projekte nach 7 Tagen ohne Aktivität. Vor Tests und Pitch das Dashboard öffnen und das Projekt bei Bedarf wieder starten.
 

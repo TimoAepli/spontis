@@ -25,4 +25,16 @@ Ab den Tests mit der Zielgruppe (03.–05.12.2026) gilt das Format:
 
 ## Nach den Tests
 
-_(folgt ab 05.12.2026)_
+### Erste Tests im Team (25.11.2026)
+
+- **Rückmeldung aus Test:** Wer einen Link bekommt, muss sich zuerst registrieren, bevor er beitreten kann. Das hält Leute ab.
+  **→ Anpassung:** Ein geteilter Link öffnet die Aktivität auch ohne Konto. Beitreten geht als **Gast** nur mit einem Anzeigenamen. Gäste können später im Profil einen Benutzernamen wählen.
+
+- **Rückmeldung aus Test:** Das Konto geht verloren, wenn man den Browser löscht oder das Handy wechselt.
+  **→ Anpassung:** Im Profil kann man unter «Konto sichern» E-Mail und Passwort hinterlegen. Neue Seite **«Anmelden»** (`/login`). Registrieren bleibt bei Benutzername und Anzeigename. «Vorname» heisst neu «Anzeigename».
+
+- **Rückmeldung aus Test:** «Nur Freunde»-Aktivitäten lassen sich nicht in einen Gruppenchat teilen, weil dort nicht alle befreundet sind.
+  **→ Anpassung:** Wer den Link hat, sieht die Aktivität und kann beitreten, auch ohne Freundschaft. In «Entdecken» erscheinen «Nur Freunde»-Aktivitäten weiterhin nur für Freunde. Wer beigetreten ist, sieht die Aktivität danach auch dort.
+
+- **Rückmeldung aus Test:** Über einen Link kommen oft neue Leute dazu, aber man wird nicht automatisch befreundet.
+  **→ Anpassung:** Wer angemeldet einen Link öffnet und mit dem Ersteller noch nicht befreundet ist, bekommt ein Pop-up «Mit Lea befreundet sein?» mit «Anfrage senden». Es erscheint pro Person einmal pro Sitzung.
