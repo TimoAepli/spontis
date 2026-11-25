@@ -1,0 +1,130 @@
+:host {
+  display: block;
+}
+
+.card {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--sp-radius);
+  background: #fff;
+  border: 1px solid var(--sp-line);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 120ms ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.happening {
+    border-color: var(--ion-color-warning);
+    box-shadow: 0 2px 12px rgba(255, 200, 50, 0.25);
+  }
+}
+
+.emoji {
+  flex: 0 0 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--sp-surface);
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.time {
+  font-weight: 700;
+  color: var(--ion-color-primary);
+}
+
+.relative {
+  color: var(--sp-muted);
+}
+
+.tag {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(11, 107, 94, 0.1);
+  color: var(--ion-color-primary);
+  white-space: nowrap;
+}
+
+.title {
+  margin: 4px 0 2px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--sp-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--sp-surface);
+  overflow: hidden;
+
+  .bar {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--ion-color-primary);
+    transition: width 300ms ease;
+  }
+}
+
+.happening .progress .bar {
+  background: var(--ion-color-warning);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.count {
+  font-weight: 600;
+}
+
+.badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--ion-color-warning);
+  color: var(--ion-color-warning-contrast);
+}
+
+.joined {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+}

@@ -1,0 +1,42 @@
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  ion-segment {
+    width: 170px;
+  }
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.center {
+  display: grid;
+  place-items: center;
+  height: 50%;
+}
+
+// Karte füllt den ganzen Inhalt
+ion-content.map-mode::part(scroll) {
+  overflow: hidden;
+}
+
+ion-content.map-mode app-activity-map {
+  height: 100%;
+}

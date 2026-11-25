@@ -1,0 +1,45 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <div class="head">
+      <h1>Heute</h1>
+      <ion-segment [value]="view()" (ionChange)="setView($event.detail.value)">
+        <ion-segment-button value="liste">
+          <ion-label>Liste</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="karte">
+          <ion-label>Karte</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [class.map-mode]="view() === 'karte'" [scrollY]="view() === 'liste'">
+  @if (view() === 'liste') {
+    <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+      <ion-refresher-content pullingText="Zum Aktualisieren ziehen" refreshingSpinner="crescent" />
+    </ion-refresher>
+  }
+
+  @if (loading()) {
+    <div class="center"><ion-spinner name="crescent" /></div>
+  } @else if (error()) {
+    <div class="sp-empty">
+      <p class="sp-empty-title">Keine Verbindung</p>
+      <p>Zum Aktualisieren nach unten ziehen.</p>
+    </div>
+  } @else if (view() === 'karte') {
+    <app-activity-map [activities]="activities()" />
+  } @else if (activities().length === 0) {
+    <div class="sp-empty">
+      <p class="sp-empty-title">Heute ist noch nichts los.</p>
+      <p>Starte etwas mit dem Plus-Knopf.</p>
+    </div>
+  } @else {
+    <ul class="list">
+      @for (a of activities(); track a.id) {
+        <li><app-activity-card [activity]="a" [now]="now()" /></li>
+      }
+    </ul>
+  }
+</ion-content>
