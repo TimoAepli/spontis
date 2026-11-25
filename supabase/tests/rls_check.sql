@@ -8,6 +8,7 @@
 --   Anna (a1) – erstellt die Aktivitäten
 --   Ben  (a2) – Freund von Anna
 --   Cem  (a3) – kein Freund von Anna
+--   Dora (a4) – Gast ohne Benutzername, öffnet einen geteilten Link
 --
 -- Ergebnis: Bei Erfolg erscheint «Alle RLS-Prüfungen bestanden».
 -- Sonst bricht das Skript mit einer Meldung «FEHLER: …» ab.
@@ -19,7 +20,8 @@ begin;
 insert into auth.users (id, aud, role, is_anonymous, created_at, updated_at) values
   ('00000000-0000-0000-0000-0000000000a1', 'authenticated', 'authenticated', true, now(), now()),
   ('00000000-0000-0000-0000-0000000000a2', 'authenticated', 'authenticated', true, now(), now()),
-  ('00000000-0000-0000-0000-0000000000a3', 'authenticated', 'authenticated', true, now(), now());
+  ('00000000-0000-0000-0000-0000000000a3', 'authenticated', 'authenticated', true, now(), now()),
+  ('00000000-0000-0000-0000-0000000000a4', 'authenticated', 'authenticated', true, now(), now());
 
 insert into public.profiles (id, username, first_name, invite_code) values
   ('00000000-0000-0000-0000-0000000000a1', 'rlstest_anna', 'Anna', 'TANNA1'),
@@ -69,12 +71,7 @@ begin
     raise exception 'FEHLER: Aktivität von gestern ist noch sichtbar';
   end if;
 
-  -- Beitreten zu «Nur Freunde» muss scheitern
-  begin
-    insert into public.participants (activity_id) values ('00000000-0000-0000-0000-0000000000b1');
-    raise exception 'FEHLER: Nicht-Freund konnte «Nur Freunde»-Aktivität beitreten';
-  exception when insufficient_privilege then null;
-  end;
+  -- (Beitreten per Link zu «Nur Freunde» ist seit der 2. Migration erlaubt → siehe Dora unten)
 
   -- Für eine andere Person beitreten muss scheitern
   begin
@@ -188,16 +185,71 @@ begin
 end $$;
 
 
+-- ---------- Dora: Gast öffnet geteilten Link einer «Nur Freunde»-Aktivität ----------
+set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000a4","role":"authenticated"}';
+
+do $$
+declare n int;
+begin
+  -- Gast-Profil nur mit Anzeigename (ohne Benutzername)
+  insert into public.profiles (first_name) values ('Dora');
+
+  -- In der Liste erscheint «Nur Freunde» weiterhin nicht
+  if exists (select 1 from public.activity_feed where id = '00000000-0000-0000-0000-0000000000b1') then
+    raise exception 'FEHLER: «Nur Freunde» erscheint ohne Freundschaft in der Liste';
+  end if;
+
+  -- Über den Link ist sie sichtbar, inkl. Anzeigenamen
+  select count(*) into n from public.activity_by_link('00000000-0000-0000-0000-0000000000b1');
+  if n <> 1 then raise exception 'FEHLER: Link-Ansicht liefert die Aktivität nicht'; end if;
+  select count(*) into n from public.participants_by_link('00000000-0000-0000-0000-0000000000b1');
+  if n <> 1 then raise exception 'FEHLER: Link-Ansicht liefert die Zusagen nicht'; end if;
+
+  -- Beitreten per Link klappt, danach ist die Aktivität für Dora sichtbar
+  insert into public.participants (activity_id) values ('00000000-0000-0000-0000-0000000000b1');
+  if not exists (select 1 from public.activity_feed where id = '00000000-0000-0000-0000-0000000000b1') then
+    raise exception 'FEHLER: Nach dem Beitritt ist die Aktivität nicht sichtbar';
+  end if;
+
+  -- Vergangene Aktivitäten: weder per Link sichtbar noch beitretbar
+  select count(*) into n from public.activity_by_link('00000000-0000-0000-0000-0000000000b3');
+  if n <> 0 then raise exception 'FEHLER: Link zeigt Aktivität von gestern'; end if;
+  begin
+    insert into public.participants (activity_id) values ('00000000-0000-0000-0000-0000000000b3');
+    raise exception 'FEHLER: Beitritt zu Aktivität von gestern möglich';
+  exception when insufficient_privilege then null;
+  end;
+
+  -- Austreten (damit die Zähler oben stimmen, falls das Skript erweitert wird)
+  delete from public.participants
+  where activity_id = '00000000-0000-0000-0000-0000000000b1'
+    and user_id = '00000000-0000-0000-0000-0000000000a4';
+end $$;
+
+
 -- ---------- Nicht angemeldet (anon) ----------
 reset role;
 set local role anon;
 set local request.jwt.claims = '{"role":"anon"}';
 
 do $$
+declare n int;
 begin
   begin
     perform 1 from public.activities limit 1;
     raise exception 'FEHLER: Nicht angemeldete Aufrufe können Aktivitäten lesen';
+  exception when insufficient_privilege then null;
+  end;
+
+  -- Link-Vorschau ohne Konto ist erlaubt …
+  select count(*) into n from public.activity_by_link('00000000-0000-0000-0000-0000000000b1');
+  if n <> 1 then raise exception 'FEHLER: Link-Vorschau ohne Konto funktioniert nicht'; end if;
+
+  -- … beitreten aber nur mit (Gast-)Konto
+  begin
+    insert into public.participants (activity_id, user_id)
+    values ('00000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-0000000000a1');
+    raise exception 'FEHLER: Beitritt ohne Konto möglich';
   exception when insufficient_privilege then null;
   end;
 end $$;
